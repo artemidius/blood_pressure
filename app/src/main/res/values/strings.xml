@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Blood Pressure</string>
+    <string name="sign_in">Sign in</string>
+    <string name="logout_dialog_title">Would you like to logout?</string>
+    <string name="logout_dialog_button_positive">Log Out</string>
+    <string name="logout_dialog_button_dismiss">Dismiss</string>
+    <string name="success_screen_message">Data submitted successfully!</string>
+    <string name="button_close_app">Close App</string>
+    <string name="button_go_to_main">Go to main screen</string>
+    <string name="button_submit">Submit</string>
+    <string name="nav_btn_share">CAMERA</string>
+    <string name="nav_btn_camera">CAMERA</string>
+    <string name="nav_btn_graph">GRAPH</string>
+    <string name="nav_btn_history">HISTORY</string>
+    <string name="nav_btn_log_out">LOG OUT</string>
+    <string name="camera_permission_hard_rationale">Text recognition will only work with camera permission</string>
+    <string name="camera_permission_soft_rationale">Permission is needed to start the camera for data recognition</string>
+    <string name="btn_give_permission">GIVE PERMISSION</string>
+    <string name="btn_close">CLOSE</string>
+</resources>
