@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
@@ -19,7 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,35 +44,35 @@ fun ButtonsRow(
         val size = 48.dp
         LargeIconButton(
             onClick = openCamera,
-            icon = Icons.Default.Build,
+            painter = painterResource(id = R.drawable.baseline_camera_alt_24),
             text = stringResource(R.string.nav_btn_camera),
             modifier = Modifier.size(size)
         )
         Spacer(Modifier.weight(1f))
         LargeIconButton(
             onClick = saveFile,
-            icon = Icons.Filled.Share,
+            imageVector = Icons.Filled.Share,
             text = stringResource(R.string.nav_btn_share),
             modifier = Modifier.size(size)
         )
         Spacer(Modifier.weight(1f))
         LargeIconButton(
             onClick = showGraph,
-            icon = Icons.Filled.DateRange,
+            imageVector = Icons.Filled.DateRange,
             text = stringResource(R.string.nav_btn_graph),
             modifier = Modifier.size(size)
         )
         Spacer(Modifier.weight(1f))
         LargeIconButton(
             onClick = showList,
-            icon = Icons.AutoMirrored.Filled.List,
+            imageVector = Icons.AutoMirrored.Filled.List,
             text = stringResource(R.string.nav_btn_history),
             modifier = Modifier.size(size)
         )
         Spacer(Modifier.weight(1f))
         LargeIconButton(
             onClick = logOut,
-            icon = Icons.AutoMirrored.Outlined.ExitToApp,
+            imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
             text = stringResource(R.string.nav_btn_log_out),
             modifier = Modifier.size(size)
         )
@@ -81,19 +82,50 @@ fun ButtonsRow(
 @Composable
 private fun LargeIconButton(
     onClick: () -> Unit,
-    icon: ImageVector,
+    imageVector: ImageVector,
     text: String,
     modifier: Modifier = Modifier
+) {
+   LargeIconButton(
+       onClick,
+       text
+   ) {
+       Icon(
+           imageVector = imageVector,
+           contentDescription = null,
+           modifier = modifier
+       )
+   }
+}
+
+@Composable
+private fun LargeIconButton(
+    onClick: () -> Unit,
+    painter: Painter,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    LargeIconButton(onClick, text) {
+        Icon(
+            painter = painter,
+            contentDescription = null,
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+private fun LargeIconButton(
+    onClick: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier,
+    icon: @Composable () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         IconButton(
             onClick = onClick,
             content = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = modifier
-                )
+                icon()
             },
             modifier = modifier
         )

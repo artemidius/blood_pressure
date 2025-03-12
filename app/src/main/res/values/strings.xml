@@ -8,7 +8,7 @@
     <string name="button_close_app">Close App</string>
     <string name="button_go_to_main">Go to main screen</string>
     <string name="button_submit">Submit</string>
-    <string name="nav_btn_share">CAMERA</string>
+    <string name="nav_btn_share">SAVE</string>
     <string name="nav_btn_camera">CAMERA</string>
     <string name="nav_btn_graph">GRAPH</string>
     <string name="nav_btn_history">HISTORY</string>
