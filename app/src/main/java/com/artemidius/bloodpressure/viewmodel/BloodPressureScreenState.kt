@@ -22,3 +22,8 @@ sealed interface BloodPressureScreenState {
         }
     }
 }
+
+@Stable
+data class SyncSwitch(
+    val isChecked: Boolean
+)

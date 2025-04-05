@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,7 +25,7 @@ import com.artemidius.bloodpressure.navigation.PressureList
 import com.artemidius.bloodpressure.navigation.Success
 import com.artemidius.bloodpressure.viewmodel.BloodPressureViewModel
 import com.artemidius.bloodpressure.viewmodel.CameraPreviewViewModel
-import com.firebase.ui.auth.AuthUI
+import com.artemidius.bloodpressure.viewmodel.HealthConnectViewModel
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 
 @ExperimentalGetImage
@@ -34,6 +35,7 @@ fun Root() {
     val navController = rememberNavController()
     val bloodPressureViewModel: BloodPressureViewModel = viewModel()
     val cameraPreviewViewModel: CameraPreviewViewModel = viewModel()
+    val healthConnectViewModel: HealthConnectViewModel = viewModel()
     val authLauncher = rememberLauncherForActivityResult(
         contract = FirebaseAuthUIActivityResultContract(),
         onResult = {
@@ -57,13 +59,10 @@ fun Root() {
         ) {
             composable<DataInput> {
                 BloodPressureScreen(
-                    launchLoginScreen = { navController.navigate(Login) },
-                    launchSuccessScreen = { navController.navigate(Success) },
-                    launchListScreen = { navController.navigate(PressureList) },
                     launchFilePicker = { filePickerLauncher.launch(bloodPressureViewModel.fileName) },
-                    launchGraphScreen = { navController.navigate(DataGraph) },
-                    launchCamera = { navController.navigate(Camera) },
-                    viewModel = bloodPressureViewModel
+                    launchAction = navController::launchAction,
+                    bloodPressureViewModel = bloodPressureViewModel,
+                    healthConnectViewModel = healthConnectViewModel
                 )
             }
             composable<Success> {
@@ -103,5 +102,15 @@ fun Root() {
                 )
             }
         }
+    }
+}
+
+fun NavController.launchAction(action: InputScreenAction) {
+    when (action) {
+        InputScreenAction.LaunchCamera -> navigate(Camera)
+        InputScreenAction.LaunchGraphScreen -> navigate(DataGraph)
+        InputScreenAction.LaunchListScreen -> navigate(PressureList)
+        InputScreenAction.LaunchLoginScreen -> navigate(Login)
+        InputScreenAction.LaunchSuccessScreen -> navigate(Success)
     }
 }

@@ -5,6 +5,7 @@ agp = "8.9.0"
 appcompat = "1.7.0"
 camerax = "1.5.0-alpha06"
 composeBom = "2024.09.00"
+connectClient = "1.1.0-alpha12"
 coreKtx = "1.10.1"
 espressoCore = "3.5.1"
 firebaseBom = "33.10.0"
@@ -35,6 +36,7 @@ androidx-camera-lifecycle            = { group  = "androidx.camera", name = "cam
 androidx-camera-camera2              = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
 accompanist-permissions              = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 androidx-compose-bom                 = { group  = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-connect-client = { module = "androidx.health.connect:connect-client", version.ref = "connectClient" }
 androidx-core-ktx                    = { group  = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-espresso-core               = { group  = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-junit                       = { group  = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

@@ -22,6 +22,7 @@ import com.artemidius.bloodpressure.data.PressureData
 import com.artemidius.bloodpressure.data.PressureUiItem
 import com.artemidius.bloodpressure.data.StorageRepository
 import com.artemidius.bloodpressure.data.toUiItem
+import com.artemidius.bloodpressure.health.connect.HealthConnectRepository
 import com.artemidius.bloodpressure.ml.ImageData
 import com.google.common.collect.ImmutableList
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +38,7 @@ class BloodPressureViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val storageRepository: StorageRepository,
     private val fileRepository: FileRepository,
+    private val healthConnectRepository: HealthConnectRepository
 ) : ViewModel() {
 
     private val stateFlow: MutableStateFlow<BloodPressureScreenState> =
@@ -68,14 +70,16 @@ class BloodPressureViewModel @Inject constructor(
 
     fun submitData() {
         (stateFlow.value as? BloodPressureScreenState.Data)?.let { currentState ->
+            val data = PressureData(
+                systolic = currentState.systolic,
+                diastolic = currentState.diastolic,
+                timestamp = System.currentTimeMillis()
+            )
             storageRepository.saveData(
-                data = PressureData(
-                    systolic = currentState.systolic,
-                    diastolic = currentState.diastolic,
-                    timestamp = System.currentTimeMillis()
-                ),
+                data = data,
                 userId = authRepository.getUserId().orEmpty()
             )
+            healthConnectRepository.writeBloodPressure(data)
         }
     }
 
@@ -140,12 +144,12 @@ class BloodPressureViewModel @Inject constructor(
             .labelData { i ->
                 list[i].date.split(" ")[0]
             }
-            .labelAndAxisLinePadding(15.dp)
+            .backgroundColor(Color.White)
             .build()
 
         val yAxisData = AxisData.Builder()
             .steps(pointsDataSystolic.size - 1)
-            .labelAndAxisLinePadding(20.dp)
+            .backgroundColor(Color.White)
             .labelData { i ->
                 "${list[i].systolic}/${list[i].diastolic}"
             }.build()

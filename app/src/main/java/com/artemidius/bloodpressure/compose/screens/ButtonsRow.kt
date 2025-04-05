@@ -51,15 +51,8 @@ fun ButtonsRow(
         Spacer(Modifier.weight(1f))
         LargeIconButton(
             onClick = saveFile,
-            imageVector = Icons.Filled.Share,
+            painter = painterResource(id = R.drawable.baseline_save_alt_24),
             text = stringResource(R.string.nav_btn_share),
-            modifier = Modifier.size(size)
-        )
-        Spacer(Modifier.weight(1f))
-        LargeIconButton(
-            onClick = showGraph,
-            imageVector = Icons.Filled.DateRange,
-            text = stringResource(R.string.nav_btn_graph),
             modifier = Modifier.size(size)
         )
         Spacer(Modifier.weight(1f))

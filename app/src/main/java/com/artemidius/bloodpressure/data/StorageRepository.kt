@@ -1,5 +1,6 @@
 package com.artemidius.bloodpressure.data
 
+import android.content.SharedPreferences
 import androidx.compose.runtime.Stable
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -23,11 +24,22 @@ interface StorageRepository {
      * Retrieves a list of pressure data for a specific user.
      */
     suspend fun retrieveData(userId: String): StateFlow<List<PressureData>>
+
+    /**
+     * Checks if synchronization is currently enabled.
+     */
+    suspend fun isSyncEnabled(): Boolean
+
+    /**
+     * Sets the synchronization status.
+     */
+    fun setSyncEnabled(status: Boolean)
 }
 
-class StorageRepositoryImpl @Inject constructor() : StorageRepository {
+class StorageRepositoryImpl @Inject constructor(private val sharedPreferences: SharedPreferences) : StorageRepository {
     private val db = Firebase.firestore
     private val _dataFlow = MutableStateFlow<List<PressureData>>(emptyList())
+    private val syncKey = "sync_enabled"
 
     override fun saveData(data: PressureData, userId: String) {
         val map = hashMapOf(
@@ -59,6 +71,17 @@ class StorageRepositoryImpl @Inject constructor() : StorageRepository {
                 _dataFlow.value = emptyList()
             }
         return _dataFlow
+    }
+
+    override suspend fun isSyncEnabled(): Boolean {
+        return sharedPreferences.getBoolean(syncKey, false)
+    }
+
+    override fun setSyncEnabled(status: Boolean) {
+        with (sharedPreferences.edit()) {
+            putBoolean(syncKey, status)
+            apply()
+        }
     }
 }
 
