@@ -5,14 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,11 +45,7 @@ fun DataInputScreen(
     healthConnectState: HealthConnectState,
     setSystolic: (Int) -> Unit,
     setDiastolic: (Int) -> Unit,
-    logOut: () -> Unit,
     submit: () -> Unit,
-    saveFile: () -> Unit,
-    syncData: (Boolean) -> Unit,
-    launchAction: (InputScreenAction) -> Unit,
     updatePermissionStatus: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -95,17 +87,6 @@ fun DataInputScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
-            healthConnectState.syncSwitch?.isChecked?.let { isChecked ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Switch(
-                        checked = isChecked,
-                        onCheckedChange = syncData
-                    )
-                    Spacer(Modifier.width(16.dp))
-                    Text(stringResource(R.string.sync_data_switch))
-                }
-                Spacer(Modifier.height(32.dp))
-            }
             Button(
                 onClick = { submit() },
                 modifier = Modifier.fillMaxWidth()
@@ -113,12 +94,5 @@ fun DataInputScreen(
                 Text(text = stringResource(R.string.button_submit))
             }
         }
-        ButtonsRow(
-            saveFile = saveFile,
-            showList = { launchAction(InputScreenAction.LaunchListScreen) },
-            logOut = logOut,
-            showGraph = { launchAction(InputScreenAction.LaunchGraphScreen) },
-            openCamera = { launchAction(InputScreenAction.LaunchCamera) }
-        )
     }
 }
