@@ -2,8 +2,8 @@ package com.artemidius.bloodpressure.data
 
 import android.content.SharedPreferences
 import androidx.compose.runtime.Stable
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
