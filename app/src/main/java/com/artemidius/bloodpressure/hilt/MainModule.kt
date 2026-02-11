@@ -15,6 +15,7 @@ import com.artemidius.bloodpressure.health.connect.HealthConnectRepository
 import com.artemidius.bloodpressure.health.connect.HealthConnectRepositoryImpl
 import com.artemidius.bloodpressure.ml.TextRecognizer
 import com.artemidius.bloodpressure.ml.TextRecognizerImpl
+import com.artemidius.bloodpressure.viewmodel.MapGraphDataUseCase
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -63,5 +64,8 @@ abstract class MainModule {
                 e.printStackTrace()
                 null
             }
+
+        @Provides
+        fun provideMapGraphDataUseCase(): MapGraphDataUseCase = MapGraphDataUseCase()
     }
 }

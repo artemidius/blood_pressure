@@ -8,9 +8,9 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.UseCase
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.lifecycle.LifecycleOwner
-import com.artemidius.bloodpressure.adjustContrast
-import com.artemidius.bloodpressure.optimizeResolution
-import com.artemidius.bloodpressure.toGrayscale
+import com.artemidius.bloodpressure.bitmap.adjustContrast
+import com.artemidius.bloodpressure.bitmap.optimizeResolution
+import com.artemidius.bloodpressure.bitmap.toGrayscale
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text

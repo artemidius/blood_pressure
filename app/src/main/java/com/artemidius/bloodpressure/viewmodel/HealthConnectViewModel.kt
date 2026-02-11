@@ -1,6 +1,5 @@
 package com.artemidius.bloodpressure.viewmodel
 
-import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.artemidius.bloodpressure.data.StorageRepository
@@ -10,12 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-@Stable
-data class HealthConnectState(
-    val syncSwitch: SyncSwitch?,
-    val launchPermissionDialog: Boolean = false,
-)
 
 @HiltViewModel
 class HealthConnectViewModel @Inject constructor(

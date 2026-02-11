@@ -39,6 +39,8 @@ fun ListScreen(
                 }
             }
         }
-        else -> {}
+        BloodPressureScreenState.Unauthorized -> {
+            //NOT IMPLEMENTED: TODO
+        }
     }
 }

@@ -2,24 +2,11 @@ package com.artemidius.bloodpressure.viewmodel
 
 import android.content.ContentResolver
 import android.net.Uri
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.yml.charts.axis.AxisData
-import co.yml.charts.common.model.Point
-import co.yml.charts.ui.linechart.model.GridLines
-import co.yml.charts.ui.linechart.model.IntersectionPoint
-import co.yml.charts.ui.linechart.model.Line
-import co.yml.charts.ui.linechart.model.LineChartData
-import co.yml.charts.ui.linechart.model.LinePlotData
-import co.yml.charts.ui.linechart.model.LineStyle
-import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
-import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import com.artemidius.bloodpressure.auth.AuthRepository
 import com.artemidius.bloodpressure.data.FileRepository
 import com.artemidius.bloodpressure.data.PressureData
-import com.artemidius.bloodpressure.data.PressureUiItem
 import com.artemidius.bloodpressure.data.StorageRepository
 import com.artemidius.bloodpressure.data.toUiItem
 import com.artemidius.bloodpressure.health.connect.HealthConnectRepository
@@ -38,7 +25,8 @@ class BloodPressureViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val storageRepository: StorageRepository,
     private val fileRepository: FileRepository,
-    private val healthConnectRepository: HealthConnectRepository
+    private val healthConnectRepository: HealthConnectRepository,
+    private val mapGraphDataUseCase: MapGraphDataUseCase
 ) : ViewModel() {
 
     private val stateFlow: MutableStateFlow<BloodPressureScreenState> =
@@ -54,6 +42,9 @@ class BloodPressureViewModel @Inject constructor(
         refreshData()
     }
 
+    /**
+     * Updates the systolic blood pressure value in the current screen state.
+     */
     fun setSys(sys: Int) {
         (stateFlow.value as? BloodPressureScreenState.Data)?.let { currentState ->
             val newState = currentState.copy(systolic = sys)
@@ -61,6 +52,9 @@ class BloodPressureViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Updates the diastolic blood pressure value in the current state.
+     */
     fun setDia(dia: Int) {
         (stateFlow.value as? BloodPressureScreenState.Data)?.let { currentState ->
             val newState = currentState.copy(diastolic = dia)
@@ -123,7 +117,7 @@ class BloodPressureViewModel @Inject constructor(
                             systolic = data.systolic,
                             diastolic = data.diastolic,
                             list = ImmutableList.copyOf(pressureData.map { it.toUiItem() }),
-                            chartData = mapGraphData(pressureData.map { it.toUiItem() })
+                            chartData = mapGraphDataUseCase(pressureData.map { it.toUiItem() })
                         )
                     } ?: run { stateFlow.value = BloodPressureScreenState.Data.getDefault() }
                 }
@@ -132,46 +126,5 @@ class BloodPressureViewModel @Inject constructor(
         } else {
             stateFlow.value = BloodPressureScreenState.Unauthorized
         }
-    }
-
-    private fun mapGraphData(list: List<PressureUiItem>): LineChartData {
-        val pointsDataSystolic = list.mapIndexed { index, pressureUiItem ->
-            Point(index.toFloat(), pressureUiItem.systolic.toFloat())
-        }
-        val xAxisData = AxisData.Builder()
-            .axisStepSize(100.dp)
-            .steps(pointsDataSystolic.size - 1)
-            .labelData { i ->
-                list[i].date.split(" ")[0]
-            }
-            .backgroundColor(Color.White)
-            .build()
-
-        val yAxisData = AxisData.Builder()
-            .steps(pointsDataSystolic.size - 1)
-            .backgroundColor(Color.White)
-            .labelData { i ->
-                "${list[i].systolic}/${list[i].diastolic}"
-            }.build()
-
-        val lineChartData = LineChartData(
-            linePlotData = LinePlotData(
-                lines = listOf(
-                    Line(
-                        dataPoints = pointsDataSystolic,
-                        lineStyle = LineStyle(),
-                        intersectionPoint = IntersectionPoint(),
-                        selectionHighlightPoint = SelectionHighlightPoint(),
-                        shadowUnderLine = null,
-                        selectionHighlightPopUp = SelectionHighlightPopUp()
-                    ),
-                ),
-            ),
-            xAxisData = xAxisData,
-            yAxisData = yAxisData,
-            gridLines = GridLines(),
-            backgroundColor = Color.White
-        )
-        return lineChartData
     }
 }

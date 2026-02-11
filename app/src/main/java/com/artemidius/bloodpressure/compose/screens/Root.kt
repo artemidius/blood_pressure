@@ -1,8 +1,8 @@
 package com.artemidius.bloodpressure.compose.screens
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,12 +26,15 @@ import com.artemidius.bloodpressure.navigation.Success
 import com.artemidius.bloodpressure.viewmodel.BloodPressureViewModel
 import com.artemidius.bloodpressure.viewmodel.CameraPreviewViewModel
 import com.artemidius.bloodpressure.viewmodel.HealthConnectViewModel
+import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 
 @ExperimentalGetImage
 @Composable
 fun Root() {
-    val context = LocalContext.current
+    val ctx = LocalContext.current
+    val resolver = ctx.contentResolver
+    val activity = LocalActivity.current
     val navController = rememberNavController()
     val bloodPressureViewModel: BloodPressureViewModel = viewModel()
     val cameraPreviewViewModel: CameraPreviewViewModel = viewModel()
@@ -44,8 +47,8 @@ fun Root() {
         }
     )
     val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument(),
-        onResult = { bloodPressureViewModel.saveFile(it, context.contentResolver) }
+        contract = CreateDocument("todo/todo"),
+        onResult = { bloodPressureViewModel.saveFile(it, resolver) }
     )
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -61,13 +64,18 @@ fun Root() {
                 BloodPressureScreen(
                     launchFilePicker = { filePickerLauncher.launch(bloodPressureViewModel.fileName) },
                     launchAction = navController::launchAction,
+                    logOut = { listener ->
+                        AuthUI.getInstance()
+                            .signOut(ctx)
+                            .addOnCompleteListener { listener() }
+                    },
                     bloodPressureViewModel = bloodPressureViewModel,
                     healthConnectViewModel = healthConnectViewModel
                 )
             }
             composable<Success> {
                 SuccessScreen(
-                    onClose = { (context as Activity).finish() },
+                    onClose = { activity?.finish() },
                     onGoToMain = {
                         navController.navigate(DataInput)
                         bloodPressureViewModel.refresh()
@@ -105,12 +113,12 @@ fun Root() {
     }
 }
 
-fun NavController.launchAction(action: InputScreenAction) {
+private fun NavController.launchAction(action: InputScreenAction) {
     when (action) {
-        InputScreenAction.LaunchCamera -> navigate(Camera)
-        InputScreenAction.LaunchGraphScreen -> navigate(DataGraph)
-        InputScreenAction.LaunchListScreen -> navigate(PressureList)
-        InputScreenAction.LaunchLoginScreen -> navigate(Login)
+        InputScreenAction.LaunchCamera        -> navigate(Camera)
+        InputScreenAction.LaunchGraphScreen   -> navigate(DataGraph)
+        InputScreenAction.LaunchListScreen    -> navigate(PressureList)
+        InputScreenAction.LaunchLoginScreen   -> navigate(Login)
         InputScreenAction.LaunchSuccessScreen -> navigate(Success)
     }
 }
