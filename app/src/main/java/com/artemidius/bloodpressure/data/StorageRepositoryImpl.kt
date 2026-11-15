@@ -3,55 +3,57 @@ package com.artemidius.bloodpressure.data
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.MetadataChanges
+import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
-class StorageRepositoryImpl @Inject constructor(private val sharedPreferences: SharedPreferences) : StorageRepository {
+class StorageRepositoryImpl @Inject constructor(private val preferences: SharedPreferences) : StorageRepository {
     private val db = Firebase.firestore
-    private val _dataFlow = MutableStateFlow<List<PressureData>>(emptyList())
-    private val syncKey = "sync_enabled"
+    private fun collection(userId: String) = db.collection("blood_pressure").document(
+        userId.also { require(it.isNotBlank()) }
+    ).collection("data")
 
-    override fun saveData(data: PressureData, userId: String) {
-        val map = hashMapOf(
-            "systolic" to data.systolic,
-            "diastolic" to data.diastolic,
+    override suspend fun saveData(data: PressureData, userId: String) {
+        require(data.id.isNotBlank() && validPressure(data.systolic, data.diastolic))
+        collection(userId).document(data.id).set(mapOf(
+            "systolic" to data.systolic, "diastolic" to data.diastolic,
             "timestamp" to data.timestamp
-        )
-        db
-            .collection("blood_pressure/$userId/data")
-            .add(map)
+        )).awaitResult()
     }
 
-    override suspend fun retrieveData(userId: String): StateFlow<List<PressureData>> {
-        db.collection("blood_pressure/$userId/data")
-            .get()
-            .addOnSuccessListener { result ->
-                    _dataFlow.value = result.documents
-                        .map {
-                            PressureData(
-                                systolic = it.getLong("systolic")?.toInt() ?: 0,
-                                diastolic = it.getLong("diastolic")?.toInt() ?: 0,
-                                timestamp = it.getLong("timestamp") ?: 0
-                            )
-                        }.filter {
-                            it.systolic != 0 && it.diastolic != 0 && it.timestamp != 0L
-                        }.sortedBy { it.timestamp }
+    override fun observeData(userId: String) = callbackFlow {
+        val registration = collection(userId).addSnapshotListener(MetadataChanges.INCLUDE) { snapshot, error ->
+            if (error != null) { close(error); return@addSnapshotListener }
+            if (snapshot != null) {
+                val readings = snapshot.documents.mapNotNull { doc ->
+                    val sys = doc.getLong("systolic") ?: return@mapNotNull null
+                    val dia = doc.getLong("diastolic") ?: return@mapNotNull null
+                    val time = doc.getLong("timestamp") ?: return@mapNotNull null
+                    if (sys !in 1..300 || dia !in 1..300 || time <= 0) return@mapNotNull null
+                    PressureData(sys.toInt(), dia.toInt(), time, doc.id)
+                }.sortedByDescending { it.timestamp }
+                trySend(ReadingSnapshot(readings, snapshot.metadata.hasPendingWrites(), snapshot.metadata.isFromCache))
             }
-            .addOnFailureListener {
-                _dataFlow.value = emptyList()
-            }
-        return _dataFlow
+        }
+        awaitClose { registration.remove() }
     }
 
-    override suspend fun isSyncEnabled(): Boolean {
-        return sharedPreferences.getBoolean(syncKey, false)
+    override suspend fun deleteData(id: String, userId: String) {
+        collection(userId).document(id).delete().awaitResult()
     }
 
-    override fun setSyncEnabled(status: Boolean) {
-        sharedPreferences.edit {
-            putBoolean(syncKey, status)
+    override suspend fun deleteAllData(userId: String) {
+        // Server reads avoid reporting a partial cached deletion as complete.
+        while (true) {
+            val page = collection(userId).limit(400).get(Source.SERVER).awaitResult()
+            if (page.isEmpty) break
+            db.batch().apply { page.documents.forEach { delete(it.reference) } }.commit().awaitResult()
         }
     }
+
+    override suspend fun isSyncEnabled() = preferences.getBoolean("sync_enabled", false)
+    override fun setSyncEnabled(status: Boolean) { preferences.edit { putBoolean("sync_enabled", status) } }
 }

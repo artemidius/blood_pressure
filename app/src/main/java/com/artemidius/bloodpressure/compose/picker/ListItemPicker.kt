@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
@@ -56,12 +57,14 @@ fun <T> ListItemPicker(
     modifier: Modifier = Modifier,
     label: (T) -> String = { it.toString() },
     value: T,
+    enabled: Boolean = true,
     onValueChange: (T) -> Unit,
     dividersColor: Color = MaterialTheme.colorScheme.primary,
     list: List<T>,
     textStyle: TextStyle = LocalTextStyle.current,
 ) {
-    val minimumAlpha = 0.3f
+    // Keep neighboring values readable against a dark surface while retaining the wheel fade.
+    val minimumAlpha = if (MaterialTheme.colorScheme.surface.luminance() < .5f) .65f else .3f
     val verticalMargin = 8.dp
     val numbersColumnHeight = 80.dp
     val halfNumbersColumnHeight = numbersColumnHeight / 2
@@ -94,6 +97,7 @@ fun <T> ListItemPicker(
         modifier = modifier
             .draggable(
                 orientation = Orientation.Vertical,
+                enabled = enabled,
                 state = rememberDraggableState { deltaY ->
                     coroutineScope.launch {
                         animatedOffset.snapTo(animatedOffset.value + deltaY)
@@ -131,7 +135,7 @@ fun <T> ListItemPicker(
             .padding(vertical = numbersColumnHeight / 3 + verticalMargin * 2),
         content = {
             Box(
-                modifier
+                Modifier
                     .width(dividersWidth)
                     .height(2.dp)
                     .background(color = dividersColor)
@@ -180,7 +184,7 @@ fun <T> ListItemPicker(
                 }
             }
             Box(
-                modifier
+                Modifier
                     .width(dividersWidth)
                     .height(2.dp)
                     .background(color = dividersColor)

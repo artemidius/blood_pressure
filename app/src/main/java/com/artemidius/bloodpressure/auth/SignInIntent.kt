@@ -1,14 +1,11 @@
 package com.artemidius.bloodpressure.auth
 
 import com.firebase.ui.auth.AuthUI
+import com.artemidius.bloodpressure.R
 
-private val providers = arrayListOf(
-    AuthUI.IdpConfig.GoogleBuilder().build(),
-    AuthUI.IdpConfig.AnonymousBuilder().build(),
-)
-
-val signInIntent = AuthUI.getInstance()
-    .createSignInIntentBuilder()
-    .setAvailableProviders(providers)
-    .setTheme(androidx.appcompat.R.style.Theme_AppCompat_NoActionBar)
+fun signInIntent(upgrade: Boolean = false) = AuthUI.getInstance().createSignInIntentBuilder()
+    .setAvailableProviders(if (upgrade) listOf(AuthUI.IdpConfig.GoogleBuilder().build()) else listOf(
+        AuthUI.IdpConfig.GoogleBuilder().build(), AuthUI.IdpConfig.AnonymousBuilder().build()))
+    .setTheme(R.style.Theme_BloodPressure)
+    .apply { if (upgrade) enableAnonymousUsersAutoUpgrade() }
     .build()

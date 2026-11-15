@@ -1,0 +1,20 @@
+{
+  "names": {
+    "0": "0",
+    "1": "1",
+    "2": "10",
+    "3": "2",
+    "4": "3",
+    "5": "4",
+    "6": "5",
+    "7": "6",
+    "8": "7",
+    "9": "8",
+    "10": "9"
+  },
+  "box_units": "input_pixels",
+  "input": "RGB NHWC float32 / 255",
+  "output": "[1, 4 + number_of_classes, candidates]; xywh + class scores",
+  "source_sha256": "7b01cce5eaa6d08f9150fa4769bf11368f7bb6717b3983c1e904b801ac21bc7d",
+  "model_sha256": "a795188f8dce78f2a1409e0dfca9a845ac1f4afedb9f192ad222550f650420d6"
+}

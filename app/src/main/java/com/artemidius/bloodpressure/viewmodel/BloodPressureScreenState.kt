@@ -1,29 +1,23 @@
 package com.artemidius.bloodpressure.viewmodel
 
-import androidx.compose.runtime.Stable
-import co.yml.charts.ui.linechart.model.LineChartData
-import co.yml.charts.ui.linechart.model.LinePlotData
-import com.artemidius.bloodpressure.data.PressureUiItem
-import com.google.common.collect.ImmutableList
+import com.artemidius.bloodpressure.data.PressureData
 
 sealed interface BloodPressureScreenState {
     data object Loading : BloodPressureScreenState
     data object Unauthorized : BloodPressureScreenState
-    @Stable
     data class Data(
-        val systolic: Int,
-        val diastolic: Int,
-        val showLogoutDialog: Boolean = false,
-        val list: ImmutableList<PressureUiItem> = ImmutableList.of(),
-        val chartData: LineChartData = LineChartData(LinePlotData(lines = emptyList()))
-    ) : BloodPressureScreenState {
-        companion object {
-            fun getDefault() = Data(120, 80)
-        }
-    }
+        val systolic: String = "120",
+        val diastolic: String = "80",
+        val timestamp: Long = System.currentTimeMillis(),
+        val editingId: String? = null,
+        val list: List<PressureData> = emptyList(),
+        val saving: Boolean = false,
+        val pending: Boolean = false,
+        val cached: Boolean = false,
+        val loading: Boolean = true,
+        val error: String? = null,
+        val message: String? = null
+    ) : BloodPressureScreenState
 }
 
-@Stable
-data class SyncSwitch(
-    val isChecked: Boolean
-)
+data class SyncSwitch(val isChecked: Boolean)

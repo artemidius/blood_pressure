@@ -12,3 +12,12 @@ app/google-services.json
 .kotlin
 gradle/
 app/release
+
+node_modules/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
+
+# Separately licensed detector weights; prepare from verified local export.
+/app/src/main/assets/seven-digits/*.tflite

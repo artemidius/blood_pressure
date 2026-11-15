@@ -1,59 +1,22 @@
 package com.artemidius.bloodpressure.viewmodel
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import co.yml.charts.axis.AxisData
-import co.yml.charts.common.model.Point
-import co.yml.charts.ui.linechart.model.GridLines
-import co.yml.charts.ui.linechart.model.IntersectionPoint
-import co.yml.charts.ui.linechart.model.Line
-import co.yml.charts.ui.linechart.model.LineChartData
-import co.yml.charts.ui.linechart.model.LinePlotData
-import co.yml.charts.ui.linechart.model.LineStyle
-import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
-import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
-import com.artemidius.bloodpressure.data.PressureUiItem
-import javax.inject.Inject
+import com.artemidius.bloodpressure.data.PressureData
+import kotlin.math.ceil
+import kotlin.math.floor
 
-class MapGraphDataUseCase @Inject constructor() {
-    operator fun invoke(list: List<PressureUiItem>): LineChartData {
-        val pointsDataSystolic = list.mapIndexed { index, pressureUiItem ->
-            Point(index.toFloat(), pressureUiItem.systolic.toFloat())
-        }
-        val xAxisData = AxisData.Builder()
-            .axisStepSize(100.dp)
-            .steps(pointsDataSystolic.size - 1)
-            .labelData { i ->
-                list[i].date.split(" ")[0]
-            }
-            .backgroundColor(Color.White)
-            .build()
+data class GraphPoint(val x: Float, val systolic: Float, val diastolic: Float)
+data class GraphSeries(val points: List<GraphPoint>, val minimum: Int, val maximum: Int)
 
-        val yAxisData = AxisData.Builder()
-            .steps(pointsDataSystolic.size - 1)
-            .backgroundColor(Color.White)
-            .labelData { i ->
-                "${list[i].systolic}/${list[i].diastolic}"
-            }.build()
-
-        val lineChartData = LineChartData(
-            linePlotData = LinePlotData(
-                lines = listOf(
-                    Line(
-                        dataPoints = pointsDataSystolic,
-                        lineStyle = LineStyle(),
-                        intersectionPoint = IntersectionPoint(),
-                        selectionHighlightPoint = SelectionHighlightPoint(),
-                        shadowUnderLine = null,
-                        selectionHighlightPopUp = SelectionHighlightPopUp()
-                    ),
-                ),
-            ),
-            xAxisData = xAxisData,
-            yAxisData = yAxisData,
-            gridLines = GridLines(),
-            backgroundColor = Color.White
-        )
-        return lineChartData
-    }
+/** Coordinates in 0..1, with y increasing upward. Time spacing is preserved. */
+fun graphSeries(readings: List<PressureData>): GraphSeries {
+    if (readings.isEmpty()) return GraphSeries(emptyList(), 0, 100)
+    val sorted = readings.sortedBy { it.timestamp }
+    val minimum = (floor(sorted.minOf { minOf(it.systolic, it.diastolic) } / 10.0) * 10 - 10).toInt().coerceAtLeast(0)
+    val maximum = (ceil(sorted.maxOf { maxOf(it.systolic, it.diastolic) } / 10.0) * 10 + 10).toInt()
+    val span = sorted.last().timestamp - sorted.first().timestamp
+    return GraphSeries(sorted.map {
+        GraphPoint(if (span == 0L) 0.5f else ((it.timestamp - sorted.first().timestamp).toDouble() / span).toFloat(),
+            (it.systolic - minimum).toFloat() / (maximum - minimum),
+            (it.diastolic - minimum).toFloat() / (maximum - minimum))
+    }, minimum, maximum)
 }

@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /blood_pressure/{userId}/data/{readingId} {
+      function owner() {
+        return request.auth != null && request.auth.uid == userId;
+      }
+      function validReading() {
+        let d = request.resource.data;
+        return d.keys().hasAll(['systolic', 'diastolic', 'timestamp'])
+          && d.keys().hasOnly(['systolic', 'diastolic', 'timestamp'])
+          && d.systolic is int && d.diastolic is int && d.timestamp is int
+          && d.systolic > 0 && d.systolic <= 300
+          && d.diastolic > 0 && d.diastolic <= 300
+          && d.systolic > d.diastolic && d.timestamp > 0;
+      }
+      allow read, delete: if owner();
+      allow create, update: if owner() && validReading();
+    }
+    // All other paths are denied by default.
+  }
+}

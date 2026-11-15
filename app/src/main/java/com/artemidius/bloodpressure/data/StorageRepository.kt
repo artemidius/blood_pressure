@@ -1,58 +1,38 @@
 package com.artemidius.bloodpressure.data
 
-import androidx.compose.runtime.Stable
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.serialization.Serializable
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.coroutines.flow.Flow
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
-/**
- * Interface for managing the storage of PressureData.
- */
 interface StorageRepository {
-    /**
-     * Saves pressure data to the storage.
-     */
-    fun saveData(data: PressureData, userId: String)
-    /**
-     * Retrieves a list of pressure data for a specific user.
-     */
-    suspend fun retrieveData(userId: String): StateFlow<List<PressureData>>
-
-    /**
-     * Checks if synchronization is currently enabled.
-     */
+    suspend fun saveData(data: PressureData, userId: String)
+    fun observeData(userId: String): Flow<ReadingSnapshot>
+    suspend fun deleteData(id: String, userId: String)
+    suspend fun deleteAllData(userId: String)
     suspend fun isSyncEnabled(): Boolean
-
-    /**
-     * Sets the synchronization status.
-     */
     fun setSyncEnabled(status: Boolean)
 }
+
+data class ReadingSnapshot(val readings: List<PressureData>, val pending: Boolean, val cached: Boolean)
 
 data class PressureData(
     val systolic: Int,
     val diastolic: Int,
-    val timestamp: Long
+    val timestamp: Long,
+    val id: String = ""
 )
 
-@Serializable
-@Stable
-data class PressureUiItem(
-    val systolic: Int,
-    val diastolic: Int,
-    val date: String
-)
+// Technical input limits, not diagnostic categories. Never clamp a measurement.
+fun validPressure(systolic: Int, diastolic: Int): Boolean =
+    systolic in 1..300 && diastolic in 1..300 && systolic > diastolic
 
-fun PressureData.toUiItem(): PressureUiItem {
-    val date = Date(timestamp)
-    val formatter = SimpleDateFormat("dd.MM HH:mm", Locale.getDefault())
-    return PressureUiItem(systolic, diastolic, formatter.format(date))
-}
+fun PressureData.displayDate(): String = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
+    .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(timestamp))
 
-fun PressureData.toCsvLine(): String {
-    val date = Date(timestamp)
-    val formatter = SimpleDateFormat("dd.MM,HH:mm", Locale.getDefault())
-    return "$systolic,$diastolic,${ formatter.format(date)}\r\n"
-}
+fun PressureData.toCsvLine(): String =
+    "$systolic,$diastolic,${Instant.ofEpochMilli(timestamp)}\r\n"
+
+fun pressureCsv(data: List<PressureData>): String =
+    "systolic_mmHg,diastolic_mmHg,measured_at_UTC\r\n" +
+        data.sortedBy { it.timestamp }.joinToString("") { it.toCsvLine() }

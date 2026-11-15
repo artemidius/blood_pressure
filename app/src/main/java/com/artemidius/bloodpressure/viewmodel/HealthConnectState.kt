@@ -1,9 +1,8 @@
 package com.artemidius.bloodpressure.viewmodel
 
-import androidx.compose.runtime.Stable
-
-@Stable
 data class HealthConnectState(
-    val syncSwitch: SyncSwitch?,
+    val syncSwitch: SyncSwitch? = null,
     val launchPermissionDialog: Boolean = false,
+    val showPermissionSettings: Boolean = false,
+    val message: String? = null
 )
