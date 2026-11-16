@@ -35,8 +35,10 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
       - uses: gradle/actions/setup-gradle@v6
-      - name: Accept Android SDK licenses
-        run: yes | sudo "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+      - name: Ensure writable Android config directory
+        # AGP creates the debug keystore and analytics settings here; a previous
+        # sudo sdkmanager run can leave it root-owned.
+        run: mkdir -p "$HOME/.config/.android"
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
       - uses: actions/upload-artifact@v7
@@ -62,8 +64,10 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
       - uses: gradle/actions/setup-gradle@v6
-      - name: Accept Android SDK licenses
-        run: yes | sudo "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+      - name: Ensure writable Android config directory
+        # AGP creates the debug keystore and analytics settings here; a previous
+        # sudo sdkmanager run can leave it root-owned.
+        run: mkdir -p "$HOME/.config/.android"
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
