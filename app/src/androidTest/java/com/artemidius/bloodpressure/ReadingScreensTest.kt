@@ -126,6 +126,21 @@ class ReadingScreensTest {
         } }
         compose.onNodeWithText("Saving…").performScrollTo().assertIsNotEnabled()
     }
+    @Test fun editingExistingReadingShowsSaveChanges() {
+        var restarted = false
+        compose.setContent { BloodPressureTheme {
+            DataInputScreen(BloodPressureScreenState.Data(
+                systolic = "131", diastolic = "84", editingId = "record", loading = false),
+                {}, {}, {}, {}, { restarted = true }, {}, {}, {})
+        } }
+        compose.onNodeWithText("Edit reading").assertExists()
+        compose.onNodeWithText("131").assertExists()
+        compose.onNodeWithText("84").assertExists()
+        compose.onNodeWithText("Save changes").performScrollTo().assertIsEnabled()
+        compose.onNodeWithText("Save reading").assertDoesNotExist()
+        compose.onNodeWithText("Start a new reading").performClick()
+        assertTrue(restarted)
+    }
     @Test fun deletionRequiresConfirmation() {
         var deleted = false
         val reading = PressureData(120, 80, 1704067200000, "record")

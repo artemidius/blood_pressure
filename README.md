@@ -165,7 +165,14 @@ adb shell am instrument -w \
   com.artemidius.bloodpressure.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
-Device tests exercise the actual detector on monitor photos, EXIF rotation, image-size limits, swipe controls, loading/error states, date/time dialogs, and inset handling. See the [scanner guide](docs/SCANNER.md#verification) for the opt-in supplied-photo regression test.
+On a throwaway emulator, Gradle can drive the same suite itself, either on an already-running device or on a managed emulator it provisions headlessly:
+
+```sh
+./gradlew connectedDebugAndroidTest     # uses the connected device/emulator
+./gradlew pixel7Api35DebugAndroidTest   # downloads and boots a managed emulator
+```
+
+Device tests exercise the actual detector on monitor photos, EXIF rotation, image-size limits, swipe controls, loading/error states, date/time dialogs, trend-period filtering, history edit/delete, account settings, and inset handling. Compose screens are tested in isolation with state and callbacks, without Firebase or an activity. See the [scanner guide](docs/SCANNER.md#verification) for the opt-in supplied-photo regression test.
 
 Firestore rules tests use an isolated demo emulator, not live readings. They require Node 24.12+ and the Firebase CLI:
 

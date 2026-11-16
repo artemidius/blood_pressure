@@ -36,6 +36,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    testOptions {
+        managedDevices {
+            localDevices.create("pixel7Api35") {
+                device = "Pixel 7"
+                apiLevel = 35
+                systemImageSource = "aosp-atd"
+            }
+        }
+    }
+
     buildFeatures {
         compose = true
     }
