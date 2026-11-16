@@ -29,10 +29,12 @@ jobs:
           persist-credentials: false
       - name: Download scanner model
         run: curl -fL "$MODEL_URL" -o app/src/main/assets/seven-digits/detector.tflite
+      - name: Restore google-services.json
+        # The tracked file is a placeholder; the real Firebase config lives in this secret.
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
       - uses: gradle/actions/setup-gradle@v6
-        with:
-          java-version: '21'
-          java-distribution: 'temurin'
       - name: Accept Android SDK licenses
         run: yes | sudo "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
       - name: Run unit tests
@@ -54,10 +56,12 @@ jobs:
           persist-credentials: false
       - name: Download scanner model
         run: curl -fL "$MODEL_URL" -o app/src/main/assets/seven-digits/detector.tflite
+      - name: Restore google-services.json
+        # The tracked file is a placeholder; the real Firebase config lives in this secret.
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
       - uses: gradle/actions/setup-gradle@v6
-        with:
-          java-version: '21'
-          java-distribution: 'temurin'
       - name: Accept Android SDK licenses
         run: yes | sudo "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
       - name: Enable KVM
